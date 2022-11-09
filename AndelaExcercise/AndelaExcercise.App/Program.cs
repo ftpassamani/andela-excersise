@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AndelaExcercise.App
 {
@@ -71,6 +73,17 @@ namespace AndelaExcercise.App
             //2.4 - I could create separeted methods for example:
             //    * a method to return a sorted list with cities
             //    * a method that receives a list of events and a customer to send email
+
+            //3 - Since I'm already using a dictionary, what I can do is to use 
+            //    Parallel.ForEach with ConcurrentDictionary
+            var concuDictCityDistance = new ConcurrentDictionary<string, int>();
+            Parallel.ForEach(events, item => {
+                if (!concuDictCityDistance.ContainsKey(item.City))
+                {
+                    var distance = GetDistance(customer.City, item.City);
+                    concuDictCityDistance[item.City] = distance;
+                }
+            });
         }
 
         // You do not need to know how these methods work
