@@ -1,1 +1,1 @@
-# andela-excersise
+# andela-exercise
