@@ -26,12 +26,9 @@ namespace AndelaExcercise.App
 
             //1.1 - Use Linq to get all events from customer city
             var eventsInCustomerCity = events.Where(e => e.City == customer.City).ToList();
-            
+
             //1.2 - Call AddToEmail methodo for each events in customer city
-            foreach (var item in eventsInCustomerCity)
-            {
-                AddToEmail(customer, item);
-            }
+            SendEmail(customer, eventsInCustomerCity);
 
             //1.3 - It will depends where John Smith lives
 
@@ -63,10 +60,7 @@ namespace AndelaExcercise.App
                 eventsToSendAnEmail.AddRange(events.Where(e => e.City == item.Key).Take(totalEventsToSend - eventsToSendAnEmail.Count));
             }
 
-            foreach (var item in eventsToSendAnEmail)
-            {
-                AddToEmail(customer, item);
-            }
+            SendEmail(customer, eventsToSendAnEmail);
 
             //2.3 - It will depends where John Smith lives
 
@@ -84,6 +78,15 @@ namespace AndelaExcercise.App
                     concuDictCityDistance[item.City] = distance;
                 }
             });
+        }
+
+        //to be use on questions 1 and 2
+        static void SendEmail(Customer customer, List<Event> events)
+        {
+            foreach (var item in events)
+            {
+                AddToEmail(customer, item);
+            }
         }
 
         // You do not need to know how these methods work
