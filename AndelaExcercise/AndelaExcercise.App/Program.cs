@@ -27,13 +27,15 @@ namespace AndelaExcercise.App
             //1.1 - Use Linq to get all events from customer city
             var eventsInCustomerCity = events.Where(e => e.City == customer.City).ToList();
 
-            //1.2 - Call AddToEmail methodo for each events in customer city
-            SendEmail(customer, eventsInCustomerCity);
+            //1.2 - Call AddListToEmail method for each events in customer city
+            Console.Out.WriteLine("Answer Question 1 \n");
+            AddListToEmail(customer, eventsInCustomerCity);
 
             //1.3 - It will depends where John Smith lives
 
-            //1.4 - Yes, we can create unit tests, aply some SOLID principles like single responsability,
-            //create a separeted method tha will receive a customer and list of events and do the logic to add email 
+            //1.4 - Yes, we can.
+            //  * Apply some SOLID principles like single responsibility;
+            //  * Create a method that receives a list of events and a customer to send email (I did that at the end)
 
 
             //2.1 - Create a Dictionary<string, int> with city (key) and distance (value)
@@ -47,7 +49,7 @@ namespace AndelaExcercise.App
                 }
             }
 
-            //2.2 - Sorte the discrionary by value (distance) and then create a list of events (5) using the sorted disctionary 
+            //2.2 - Sort the dictionary by value (distance) and then create a list of events (5) using the sorted dictionary
             var sortedDictCityDistance = from entry in dictCityDistance orderby entry.Value ascending select entry;
             var totalEventsToSend = 5;
             var eventsToSendAnEmail = new List<Event>();
@@ -60,28 +62,62 @@ namespace AndelaExcercise.App
                 eventsToSendAnEmail.AddRange(events.Where(e => e.City == item.Key).Take(totalEventsToSend - eventsToSendAnEmail.Count));
             }
 
-            SendEmail(customer, eventsToSendAnEmail);
+            Console.Out.WriteLine("\n\nAnswer Question 2 \n");
+            AddListToEmail(customer, eventsToSendAnEmail);
 
             //2.3 - It will depends where John Smith lives
 
-            //2.4 - I could create separeted methods for example:
-            //    * a method to return a sorted list with cities
-            //    * a method that receives a list of events and a customer to send email
+            //2.4 - Yes, we can:
+            //  * Apply some SOLID principles like single responsibility;
+            //  * Create a method to return a sorted list with cities
+            //  * Create a method that receives a list of events and a customer to send email (I did that at the end)
 
             //3 - Since I'm already using a dictionary, what I can do is to use 
-            //    Parallel.ForEach with ConcurrentDictionary
+            //    Parallel.ForEach with ConcurrentDictionary and have a try catch
             var concuDictCityDistance = new ConcurrentDictionary<string, int>();
             Parallel.ForEach(events, item => {
-                if (!concuDictCityDistance.ContainsKey(item.City))
+                try
                 {
-                    var distance = GetDistance(customer.City, item.City);
-                    concuDictCityDistance[item.City] = distance;
+                    if (!concuDictCityDistance.ContainsKey(item.City))
+                    {
+                        var distance = GetDistance(customer.City, item.City);
+                        concuDictCityDistance[item.City] = distance;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.Out.WriteLine($"{customer.Name}: {item.Name} in {item.City}"
+                        + $" Exception: {e.Message}");
                 }
             });
+
+            var sortedConcuDictCityDistance = from entry in concuDictCityDistance orderby entry.Value ascending select entry;
+            var eventsToSendAnEmailQuestion3 = new List<Event>();
+
+            foreach (var item in sortedConcuDictCityDistance)
+            {
+                if (eventsToSendAnEmailQuestion3.Count == totalEventsToSend)
+                    break;
+
+                eventsToSendAnEmailQuestion3.AddRange(events.Where(e => e.City == item.Key).Take(totalEventsToSend - eventsToSendAnEmailQuestion3.Count));
+            }
+
+            Console.Out.WriteLine("\n\nAnswer Question 3 \n");
+            AddListToEmail(customer, eventsToSendAnEmailQuestion3);
+
+            //4 - We can use the code written in question 3 for the question 4
+            Console.Out.WriteLine("\n\nAnswer Question 4 \n");
+            AddListToEmail(customer, eventsToSendAnEmailQuestion3);
+
+            //5 - We can use OrdeynBy and ThenBy
+            var eventsOrderbyDistanceAndPrice = events.OrderBy(e => dictCityDistance[e.City]).ThenBy(x => GetPrice(x)).Take(5);
+
+            Console.Out.WriteLine("\n\nAnswer Question 5 \n");
+            AddListToEmail(customer, eventsOrderbyDistanceAndPrice);
         }
 
-        //to be use on questions 1 and 2
-        static void SendEmail(Customer customer, List<Event> events)
+        // To be use in all questions
+        static void AddListToEmail(Customer customer, IEnumerable<Event> events)
         {
             foreach (var item in events)
             {
