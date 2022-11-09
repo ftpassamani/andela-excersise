@@ -24,6 +24,24 @@ namespace AndelaExcercise.App
             
             var customer = new Customer { Name = "Mr. Fake", City = "New York" };
 
+            Question1(customer, events);
+            Question2(customer, events);
+            Question3(customer, events);
+            Question4(customer, events);
+            Question5(customer, events);
+        }
+
+        // To be use in all questions
+        static void AddListToEmail(Customer customer, IEnumerable<Event> events)
+        {
+            foreach (var item in events)
+            {
+                AddToEmail(customer, item);
+            }
+        }
+
+        static void Question1(Customer customer, List<Event> events)
+        {
             //1.1 - Use Linq to get all events from customer city
             var eventsInCustomerCity = events.Where(e => e.City == customer.City).ToList();
 
@@ -36,8 +54,10 @@ namespace AndelaExcercise.App
             //1.4 - Yes, we can.
             //  * Apply some SOLID principles like single responsibility;
             //  * Create a method that receives a list of events and a customer to send email (I did that at the end)
+        }
 
-
+        static void Question2(Customer customer, List<Event> events)
+        {
             //2.1 - Create a Dictionary<string, int> with city (key) and distance (value)
             var dictCityDistance = new Dictionary<string, int>();
             foreach (var item in events)
@@ -71,7 +91,10 @@ namespace AndelaExcercise.App
             //  * Apply some SOLID principles like single responsibility;
             //  * Create a method to return a sorted list with cities
             //  * Create a method that receives a list of events and a customer to send email (I did that at the end)
+        }
 
+        static void Question3(Customer customer, List<Event> events)
+        {
             //3 - Since I'm already using a dictionary, what I can do is to use 
             //    Parallel.ForEach with ConcurrentDictionary and have a try catch
             var concuDictCityDistance = new ConcurrentDictionary<string, int>();
@@ -92,6 +115,7 @@ namespace AndelaExcercise.App
             });
 
             var sortedConcuDictCityDistance = from entry in concuDictCityDistance orderby entry.Value ascending select entry;
+            var totalEventsToSend = 5;
             var eventsToSendAnEmailQuestion3 = new List<Event>();
 
             foreach (var item in sortedConcuDictCityDistance)
@@ -104,25 +128,32 @@ namespace AndelaExcercise.App
 
             Console.Out.WriteLine("\n\nAnswer Question 3 \n");
             AddListToEmail(customer, eventsToSendAnEmailQuestion3);
+        }
 
+        static void Question4(Customer customer, List<Event> events)
+        {
             //4 - We can use the code written in question 3 for the question 4
-            Console.Out.WriteLine("\n\nAnswer Question 4 \n");
-            AddListToEmail(customer, eventsToSendAnEmailQuestion3);
+            Console.Out.WriteLine("\n\nAnswer Question 4 (same output for question 3)");
+            //Question3(customer, events);
+        }
+
+        static void Question5(Customer customer, List<Event> events)
+        {
+            var dictCityDistance = new Dictionary<string, int>();
+            foreach (var item in events)
+            {
+                if (!dictCityDistance.ContainsKey(item.City))
+                {
+                    var distance = GetDistance(customer.City, item.City);
+                    dictCityDistance[item.City] = distance;
+                }
+            }
 
             //5 - We can use OrdeynBy and ThenBy
             var eventsOrderbyDistanceAndPrice = events.OrderBy(e => dictCityDistance[e.City]).ThenBy(x => GetPrice(x)).Take(5);
 
             Console.Out.WriteLine("\n\nAnswer Question 5 \n");
             AddListToEmail(customer, eventsOrderbyDistanceAndPrice);
-        }
-
-        // To be use in all questions
-        static void AddListToEmail(Customer customer, IEnumerable<Event> events)
-        {
-            foreach (var item in events)
-            {
-                AddToEmail(customer, item);
-            }
         }
 
         // You do not need to know how these methods work
