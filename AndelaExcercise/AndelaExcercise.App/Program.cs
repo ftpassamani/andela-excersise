@@ -30,13 +30,49 @@ namespace AndelaExcercise.App
             {
                 AddToEmail(customer, item);
             }
-            
-            //1.3 - It will depends where this customer lives
-            
+
+            //1.3 - It will depends where John Smith lives
+
             //1.4 - Yes, we can create unit tests, aply some SOLID principles like single responsability,
-            //create a separeted method thac will receive a customer and list of events and do the logic to add email 
+            //create a separeted method tha will receive a customer and list of events and do the logic to add email 
+
+
+            //2.1 - Create a Dictionary<string, int> with city (key) and distance (value)
+            var dictCityDistance = new Dictionary<string, int>();
+            foreach (var item in events)
+            {
+                if (!dictCityDistance.ContainsKey(item.City))
+                {
+                    var distance = GetDistance(customer.City, item.City);
+                    dictCityDistance[item.City] = distance;
+                }
+            }
+
+            //2.2 - Sorte the discrionary by value (distance) and then create a list of events (5) using the sorted disctionary 
+            var sortedDictCityDistance = from entry in dictCityDistance orderby entry.Value ascending select entry;
+            var totalEventsToSend = 5;
+            var eventsToSendAnEmail = new List<Event>();
+
+            foreach (var item in sortedDictCityDistance)
+            {
+                if (eventsToSendAnEmail.Count == totalEventsToSend)
+                    break;
+
+                eventsToSendAnEmail.AddRange(events.Where(e => e.City == item.Key).Take(totalEventsToSend - eventsToSendAnEmail.Count));
+            }
+
+            foreach (var item in eventsToSendAnEmail)
+            {
+                AddToEmail(customer, item);
+            }
+
+            //2.3 - It will depends where John Smith lives
+
+            //2.4 - I could create separeted methods for example:
+            //    * a method to return a sorted list with cities
+            //    * a method that receives a list of events and a customer to send email
         }
-        
+
         // You do not need to know how these methods work
         static void AddToEmail(Customer c, Event e, int? price = null)
         {
